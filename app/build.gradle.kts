@@ -79,4 +79,7 @@ dependencies {
 
     // Kakao Map
     implementation("com.kakao.maps.open:android:2.5.0")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.2.2")
 }
