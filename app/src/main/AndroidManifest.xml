@@ -17,6 +17,12 @@
         android:theme="@style/Theme.SplashScreenApp"
         tools:targetApi="31" >
 
+        <!-- 카카오맵 메타데이터 -->
+        <meta-data
+            android:name="com.kakao.vectormap.APP_KEY"
+            android:value="a58677ad3cb00cbc87a88cfaf35cf3c1"
+        />
+
         <activity
             android:name=".SplashActivity"
             android:exported="true"

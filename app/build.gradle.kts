@@ -76,4 +76,7 @@ dependencies {
     // Kakao Login
     implementation("com.kakao.sdk:v2-user:2.16.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
+
+    // Kakao Map
+    implementation("com.kakao.maps.open:android:2.5.0")
 }

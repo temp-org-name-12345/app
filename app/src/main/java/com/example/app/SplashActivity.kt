@@ -20,15 +20,15 @@ class SplashActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
+        val keyHash = Utility.getKeyHash(this@SplashActivity)
+        Log.e(TAG, "keyHash : $keyHash")
+
         lifecycleScope.launchWhenCreated {
             KakaoSdk.init(this@SplashActivity, getString(R.string.KAKAO_NATIVE_APP_KEY))
 
-            val keyHash = Utility.getKeyHash(this@SplashActivity)
-            Log.e(TAG, "keyHash : $keyHash")
+            delay(2000)
 
-            delay(3000)
-
-            val intent = Intent(this@SplashActivity, MainActivity::class.java)
+            val intent = Intent(this@SplashActivity, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
