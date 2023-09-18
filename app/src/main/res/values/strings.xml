@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">app</string>
+    <string name="app_name">딱대</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="KAKAO_NATIVE_APP_KEY">a58677ad3cb00cbc87a88cfaf35cf3c1</string>
     <string name="title_activity_login">LoginActivity</string>

@@ -6,10 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import com.kakao.sdk.common.KakaoSdk
 import com.kakao.sdk.common.util.Utility
-import kotlinx.coroutines.delay
 
 class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,18 +18,13 @@ class SplashActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        val keyHash = Utility.getKeyHash(this@SplashActivity)
+        val keyHash = Utility.getKeyHash(this)
+        KakaoSdk.init(this, getString(R.string.KAKAO_NATIVE_APP_KEY))
+
         Log.e(TAG, "keyHash : $keyHash")
 
-        lifecycleScope.launchWhenCreated {
-            KakaoSdk.init(this@SplashActivity, getString(R.string.KAKAO_NATIVE_APP_KEY))
-
-            delay(2000)
-
-            val intent = Intent(this@SplashActivity, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
     }
 
     companion object {

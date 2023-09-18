@@ -8,14 +8,22 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.ViewModelProvider
 import com.example.app.ui.theme.AppTheme
+import com.example.app.viewModel.MainViewModel
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -27,6 +35,9 @@ import java.lang.Exception
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
         setContent {
             AppTheme {
                 // A surface container using the 'background' color from the theme
@@ -34,9 +45,27 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    MainScreen(name = "hi", viewModel = viewModel)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun MainScreen(name: String, viewModel: MainViewModel) {
+    Text(text = name)
+
+    val allUser by viewModel.allUserInfo.observeAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getAllUser()
+    }
+
+    LazyColumn {
+        itemsIndexed(allUser ?: listOf()) { _, item ->
+            Text(text = item.email)
+            Text(text = item.nickname)
         }
     }
 }
@@ -44,7 +73,9 @@ class MainActivity : ComponentActivity() {
 // KAKAO MAP DOCS : https://apis.map.kakao.com/android_v2/docs/getting-started/quickstart/
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun MainScreen2(name: String, modifier: Modifier = Modifier) {
+    Log.e("MainScreen", "MainScreen Composed")
+
     Scaffold { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             AndroidView(

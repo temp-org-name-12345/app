@@ -4,11 +4,11 @@
     <style name="SplashScreenTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
-        <item name="windowSplashScreenAnimationDuration">800</item>
-        <item name="postSplashScreenTheme">@style/Theme.SplashScreenApp</item>
+        <item name="windowSplashScreenAnimationDuration">4500</item>
+        <item name="postSplashScreenTheme">@style/Theme.AppCompat</item>
     </style>
 
-    <style name="Theme.SplashScreenApp" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.AppCompat" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/white</item>
 
     </style>
