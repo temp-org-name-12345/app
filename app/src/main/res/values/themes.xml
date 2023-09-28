@@ -10,6 +10,6 @@
 
     <style name="Theme.AppCompat" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/white</item>
-
     </style>
+
 </resources>

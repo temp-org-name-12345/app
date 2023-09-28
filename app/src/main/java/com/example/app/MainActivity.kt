@@ -3,27 +3,27 @@ package com.example.app
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModelProvider
 import com.example.app.ui.theme.AppTheme
-import com.example.app.viewModel.MainViewModel
+import com.example.app.viewModel.UserViewModel
+import com.example.app.viewModel.UserViewModelFactory
+import com.kakao.sdk.common.KakaoSdk
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -36,51 +36,46 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        val userViewModel = ViewModelProvider(this, UserViewModelFactory())[UserViewModel::class.java]
+        val keyHash = KakaoSdk.keyHash
 
         setContent {
             AppTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen(name = "hi", viewModel = viewModel)
+                    MainScreen(
+                        viewModel = userViewModel,
+                        keyHash = keyHash
+                    )
                 }
             }
         }
     }
 }
 
-@Composable
-fun MainScreen(name: String, viewModel: MainViewModel) {
-    Text(text = name)
-
-    val allUser by viewModel.allUserInfo.observeAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.getAllUser()
-    }
-
-    LazyColumn {
-        itemsIndexed(allUser ?: listOf()) { _, item ->
-            Text(text = item.email)
-            Text(text = item.nickname)
-        }
-    }
-}
 
 // KAKAO MAP DOCS : https://apis.map.kakao.com/android_v2/docs/getting-started/quickstart/
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen2(name: String, modifier: Modifier = Modifier) {
-    Log.e("MainScreen", "MainScreen Composed")
+fun MainScreen(
+    viewModel: UserViewModel,
+    keyHash: String
+) {
+    LaunchedEffect(Unit) {
+        viewModel.getUserByKeyHash(keyHash)
+    }
+
+    val user by viewModel.user.observeAsState()
+
+    Toast.makeText(LocalContext.current, user?.toString() ?: "null", Toast.LENGTH_LONG).show()
 
     Scaffold { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             AndroidView(
                 factory = { context: Context ->
                     val mv = MapView(context)
+
                     mv.start(
                         object : MapLifeCycleCallback() {
                             // 지도 API가 정상적으로 종료될 때 호출
@@ -136,8 +131,6 @@ fun MainScreen2(name: String, modifier: Modifier = Modifier) {
                 },
 
                 modifier = Modifier.fillMaxSize(),
-
-                update = { mv -> mv }
             )
         }
     }

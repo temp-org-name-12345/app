@@ -1,26 +1,29 @@
 package com.example.app.repository
 
-import com.example.app.User
-import com.example.app.util.RetrofitClient
+import android.util.Log
+import com.example.app.dao.UserRetrofitDao
+import com.example.app.model.User
 import retrofit2.Response
-import java.net.URLEncoder
 
 class UserRetrofitRepository {
     companion object {
-        private const val DEFAULT_ENCODE_TYPE = "UTF-8"
-        private val userRetrofitDao = RetrofitClient.userRetrofitDao
+        private const val TAG = "UserRetrofitRepository"
+        private val userRetrofitDao = UserRetrofitDao.userRetrofitDao
+
+        private fun logging(methodName: String, it: Any?) {
+            Log.e(TAG, "$methodName : $it")
+        }
     }
 
-    suspend fun checkUserByEmail(email: String) : Response<Boolean> {
-        val encodedEmail = URLEncoder.encode(email, DEFAULT_ENCODE_TYPE)
-        return userRetrofitDao.checkUserByEmail(encodedEmail)
-    }
+    suspend fun saveUser(user: User) : Response<User> =
+        userRetrofitDao
+            .saveUser(user)
+            .also { logging("saveUser()", it) }
 
-    suspend fun saveUser(user: User) : Response<User> {
-        return userRetrofitDao.saveUser(user)
-    }
 
-    suspend fun getAllUser() : Response<List<User>> {
-        return userRetrofitDao.getAllUser()
-    }
+    suspend fun getUserByKeyHash(keyHash: String) : Response<User> =
+        userRetrofitDao
+            .getUserByKeyHash(keyHash)
+            .also { logging("getUserByKeyHash()", it) }
+
 }

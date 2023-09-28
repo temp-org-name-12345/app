@@ -4,27 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.example.app.MainActivity
-import com.example.app.User
-import com.example.app.repository.UserRetrofitRepository
-import com.example.app.viewModel.MainViewModel
+import com.example.app.model.User
+import com.example.app.viewModel.UserViewModel
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 
 object KakaoLogin {
-    val TAG = "Kakao Login"
-    private val userRetrofitRepository = UserRetrofitRepository()
-    private val viewModel = MainViewModel(userRetrofitRepository)
+    private const val TAG = "Kakao Login"
 
-    fun login(context: Context) {
+    fun login(context: Context, keyHash: String, viewModel: UserViewModel) {
         val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
             if (error != null) Log.e(TAG, "로그인 실패 $error")
             else if (token != null) Log.e(TAG, "로그인 성공 ${token.accessToken} ${token.idToken}")
         }
 
         val instance = UserApiClient.instance
-        var kakaoUser: User? = null
 
         if (instance.isKakaoTalkLoginAvailable(context)) {
             instance.loginWithKakaoTalk(context) { token, error ->
@@ -53,26 +49,20 @@ object KakaoLogin {
 
                 val nickname = account?.profile?.nickname
                 val email = account?.email
-                val profileImageUrl = account?.profile?.profileImageUrl
+                val profileUrl = account?.profile?.profileImageUrl
 
                 viewModel.saveUser(
                     User(
                         nickname = nickname!!,
                         email = email!!,
-                        profileImageUrl = profileImageUrl!!,
+                        profileUrl = profileUrl!!,
+                        keyHash = keyHash
                     )
                 )
 
-                Log.d(TAG, "서버에 전송합니다")
-
-                toMain(context, kakaoUser!!)
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
             }
         }
-    }
-
-    private fun toMain(context: Context, user: User) {
-        val intent = Intent(context, MainActivity::class.java)
-        intent.putExtra("user", user)
-        context.startActivity(intent)
     }
 }
