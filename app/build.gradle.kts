@@ -66,10 +66,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Retrofit2
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
     // Splash
     implementation("androidx.core:core-splashscreen:1.0.1")
 
@@ -77,7 +73,7 @@ dependencies {
     implementation("com.kakao.sdk:v2-user:2.16.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
 
-    // Kakao Map
+    // Kakao Map (Retrofit2, Gson 라이브러리 포함)
     implementation("com.kakao.maps.open:android:2.5.0")
 
     // Coil

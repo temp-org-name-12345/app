@@ -23,9 +23,6 @@ class UserViewModelFactory : ViewModelProvider.Factory {
 class UserViewModel(
     private val userRetrofitRepository: UserRetrofitRepository = UserRetrofitRepository()
 ) : ViewModel() {
-    companion object {
-        private const val TAG = "UserViewModel"
-    }
 
     private var _user : MutableLiveData<User> = MutableLiveData(null)
     val user : LiveData<User> get() = _user
@@ -35,12 +32,10 @@ class UserViewModel(
             val result = userRetrofitRepository.saveUser(user)
 
             if (result.isSuccessful) {
-                Log.e("$TAG saveUser()", "res = $result")
                 _user.value = result.body()
             }
 
             else {
-                Log.e("$TAG saveUser()", result.body().toString())
                 _user.value = null
             }
         }
@@ -50,10 +45,8 @@ class UserViewModel(
         val result = userRetrofitRepository.getUserByKeyHash(keyHash)
 
         if (result.isSuccessful) {
-            Log.e("$TAG getUserByKeyHash()", "res = $result")
             _user.value = result.body()
         } else {
-            Log.e("$TAG getUserByKeyHash()", result.body().toString())
             _user.value = null
         }
 

@@ -1,6 +1,5 @@
 package com.example.app
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,14 +14,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -31,9 +33,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.app.ui.theme.AppTheme
+import com.example.app.ui.theme.screen.AddScreen
 import com.example.app.ui.theme.screen.MapScreen
 import com.example.app.ui.theme.screen.ProfileScreen
 import com.example.app.ui.theme.screen.UserScreen
+import com.example.app.viewModel.MapViewModel
+import com.example.app.viewModel.MapViewModelFactory
 import com.example.app.viewModel.UserViewModel
 import com.example.app.viewModel.UserViewModelFactory
 import com.kakao.sdk.common.KakaoSdk
@@ -44,6 +49,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val userViewModel = ViewModelProvider(this, UserViewModelFactory())[UserViewModel::class.java]
+        val mapViewModel = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
+
         val keyHash = KakaoSdk.keyHash
 
         setContent {
@@ -54,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Root(
                         userViewModel = userViewModel,
+                        mapViewModel = mapViewModel,
                         keyHash = keyHash
                     )
                 }
@@ -72,10 +80,11 @@ sealed class Screen(val route: String) {
         val badgeCount: Int
     ) {
         object Map : BottomNavScreen("map", "Map", Icons.Filled.Home, 3)
+        object Add : BottomNavScreen("add", "Add", Icons.Filled.Add, 5)
         object Profile : BottomNavScreen("profile", "Profile", Icons.Filled.AccountCircle, 5)
 
         companion object {
-            val BottomItems = listOf(Map, Profile)
+            val BottomItems = listOf(Map, Add, Profile)
         }
     }
 }
@@ -85,21 +94,29 @@ sealed class Screen(val route: String) {
 @Composable
 fun Root(
     userViewModel: UserViewModel,
+    mapViewModel: MapViewModel,
     keyHash: String
 ) {
     val navController = rememberNavController()
 
+    LaunchedEffect(Unit) {
+        userViewModel.getUserByKeyHash(keyHash)
+    }
+
+    val user by userViewModel.user.observeAsState()
+
     Scaffold(
         bottomBar = { BottomNavGraph(navController = navController) }
-
-
     ) {
 
         Box(modifier = Modifier.padding(it)) {
-
             NavHost(navController = navController, startDestination = Screen.BottomNavScreen.Map.route) {
                 composable(route = Screen.BottomNavScreen.Map.route) {
-                    MapScreen(userViewModel, keyHash)
+                    MapScreen(userViewModel, user)
+                }
+
+                composable(route = Screen.BottomNavScreen.Add.route) {
+                    AddScreen(mapViewModel)
                 }
 
                 composable(route = Screen.BottomNavScreen.Profile.route) {
@@ -129,7 +146,7 @@ fun BottomNavGraph(navController: NavController) {
         items.forEach { item ->
             BottomNavigationItem(
                 icon = { Icon(imageVector = item.icon, contentDescription = null) },
-                label = { Text(text = item.title, fontSize = 9.sp) },
+                label = { Text(text = item.title, fontSize = 12.sp, fontWeight = FontWeight.Bold) },
                 selectedContentColor = Color.Black,
                 unselectedContentColor = Color.Black.copy(0.4f),
                 alwaysShowLabel = true,
