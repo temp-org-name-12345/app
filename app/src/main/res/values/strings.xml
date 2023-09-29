@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">app</string>
+    <string name="app_name">딱대</string>
+    <string name="KAKAO_NATIVE_APP_KEY">a58677ad3cb00cbc87a88cfaf35cf3c1</string>
+    <string name="KAKAO_REST_API_KEY">a93bc86ac9b1000311f9bf50504770a4</string>
+    <string name="KAKAO_ADMIN_KEY">03ab3e67f48c311154b44abb29630e88</string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
 </resources>

@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.app"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.app"
-        minSdk = 28
-        targetSdk = 33
+        minSdk = 26
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -50,9 +50,8 @@ android {
 }
 
 dependencies {
-
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")
@@ -66,4 +65,31 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Splash
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // Kakao Login
+    implementation("com.kakao.sdk:v2-user:2.16.0")
+    implementation(platform("androidx.compose:compose-bom:2023.03.00"))
+
+    // Kakao Map (Retrofit2, Gson 라이브러리 포함)
+    implementation("com.kakao.maps.open:android:2.5.0")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
+    // LiveData
+    implementation("androidx.compose.runtime:runtime-livedata")
+
+    // Bottom Drawer Lib
+    implementation("de.charlex.compose:bottom-drawer-scaffold:1.1.0-beta02")
+
+    // navigation
+    val nav_version = "2.7.0"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    // ViewPager
+    implementation("com.google.accompanist:accompanist-pager:0.20.1")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.20.1")
 }
