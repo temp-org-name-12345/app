@@ -52,4 +52,16 @@ class UserViewModel(
 
         return _user.value
     }
+
+    private val _thumbnailImage : MutableLiveData<List<String>> = MutableLiveData()
+    val thumbnailImage : LiveData<List<String>> get() = _thumbnailImage
+
+    fun getAppThumbnailImage() {
+        viewModelScope.launch {
+            val result = userRetrofitRepository.getAppThumbnail()
+
+            if (result.isSuccessful) _thumbnailImage.value = result.body()
+            else throw IllegalStateException(result.message())
+        }
+    }
 }

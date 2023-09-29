@@ -34,4 +34,7 @@ interface UserRetrofitDao {
 
     @POST("save")
     suspend fun saveUser(@Body user: User) : Response<User>
+
+    @POST("thumbnail")
+    suspend fun getAppThumbnail() : Response<List<String>>
 }

@@ -26,4 +26,8 @@ class UserRetrofitRepository {
             .getUserByKeyHash(keyHash)
             .also { logging("getUserByKeyHash()", it) }
 
+    suspend fun getAppThumbnail() : Response<List<String>> =
+        userRetrofitDao
+            .getAppThumbnail()
+            .also { logging("getAppThumbnail()", it) }
 }
