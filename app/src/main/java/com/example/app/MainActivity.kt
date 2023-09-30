@@ -1,10 +1,8 @@
 package com.example.app
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,7 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.app.ui.theme.AppTheme
-import com.example.app.ui.theme.screen.AddScreen
+import com.example.app.ui.theme.screen.addLocation.AddScreen
 import com.example.app.ui.theme.screen.MapScreen
 import com.example.app.ui.theme.screen.ProfileScreen
 import com.example.app.ui.theme.screen.UserScreen
@@ -93,7 +91,6 @@ sealed class Screen(val route: String) {
 
 
 
-@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Root(
     userViewModel: UserViewModel,

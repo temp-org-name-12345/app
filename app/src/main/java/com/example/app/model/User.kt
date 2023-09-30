@@ -1,6 +1,5 @@
 package com.example.app.model
 
-import android.graphics.Bitmap
 import java.time.LocalDateTime
 
 
@@ -17,6 +16,7 @@ data class AddLocationReq(
     val lng: Double?,
     val visitDate: LocalDateTime?,
     val isSpecial: Boolean?,
-    val name: String?,
+    val addressName: String?,
+    val storeName: String?,
     val userId: Int?,
 )

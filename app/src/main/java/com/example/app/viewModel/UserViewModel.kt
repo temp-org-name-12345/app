@@ -118,7 +118,8 @@ class UserViewModel(
                         "\"lng\":\"${req.lng}\"," +
                         "\"visitDate\":\"${req.visitDate}\"," +
                         "\"isSpecial\":\"${req.isSpecial}\"," +
-                        "\"name\":\"${req.name}\"" +
+                        "\"name\":\"${req.addressName}\"," +
+                        "\"name\":\"${req.storeName}\"" +
                     "}"
             ).toString()
 
