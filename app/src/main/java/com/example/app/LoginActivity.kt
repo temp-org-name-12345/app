@@ -34,7 +34,7 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val keyHash = intent.getStringExtra("keyHash") ?: ""
-        val userViewModel = ViewModelProvider(this, UserViewModelFactory())[UserViewModel::class.java]
+        val userViewModel = ViewModelProvider(this, UserViewModelFactory(keyHash))[UserViewModel::class.java]
 
         setContent {
             AppTheme {
@@ -94,7 +94,5 @@ fun LoginScreen(
             }
         }
     )
-
-
 }
 

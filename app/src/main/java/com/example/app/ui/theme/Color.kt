@@ -14,4 +14,7 @@ object CustomColor {
 
     /* MapScreen */
     val DrawerBackgroundColor = Color(0xAA000000)
+
+    /* AddScreen */
+    val ButtonBackgroundColor = Color(0xff7735fc)
 }

@@ -2,7 +2,10 @@ package com.example.app.repository
 
 import android.util.Log
 import com.example.app.dao.UserRetrofitDao
+import com.example.app.model.AddLocationReq
 import com.example.app.model.User
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 
 class UserRetrofitRepository {
@@ -30,4 +33,17 @@ class UserRetrofitRepository {
         userRetrofitDao
             .getAppThumbnail()
             .also { logging("getAppThumbnail()", it) }
+
+    suspend fun addLocationReq(images: List<MultipartBody.Part?>, req: RequestBody) : Response<Unit> =
+        userRetrofitDao
+            .uploadLocation(images, req)
+            .also { logging("addLocationReq", req) }
+
+    /*
+    suspend fun uploadTest(image: MultipartBody.Part) =
+        userRetrofitDao
+            .uploadLocation(image)
+            .also { logging("uploadTest", image) }
+
+     */
 }
