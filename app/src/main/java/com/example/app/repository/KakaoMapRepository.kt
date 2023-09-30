@@ -8,9 +8,7 @@ import retrofit2.Response
 class KakaoMapRepository {
     companion object {
         private val kakaoMapDao = KakaoMapDao.kakaoMapDao
-
         private const val TAG = "KakaoMapRepository"
-        private const val DEFAULT_URL_ENCODE = "UTF-8"
 
         private fun logging(methodName: String, it: Any?) {
             Log.e(TAG, "$methodName : $it")
@@ -22,7 +20,10 @@ class KakaoMapRepository {
 
         return kakaoMapDao
             .searchLocation(auth, query)
-            .also { logging("searchLocation", it.body()) }
-            .also { logging("searchLocation", auth) }
+            .also {
+                logging("searchLocation", it)
+                logging("searchLocation", it.body())
+                logging("searchLocation", auth)
+            }
     }
 }

@@ -1,8 +1,10 @@
 package com.example.app
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -48,10 +50,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val userViewModel = ViewModelProvider(this, UserViewModelFactory())[UserViewModel::class.java]
-        val mapViewModel = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
-
         val keyHash = KakaoSdk.keyHash
+        val key = getString(R.string.KAKAO_REST_API_KEY)
+
+        val userViewModel = ViewModelProvider(this, UserViewModelFactory(keyHash))[UserViewModel::class.java]
+        val mapViewModel = ViewModelProvider(this, MapViewModelFactory(key))[MapViewModel::class.java]
 
         setContent {
             AppTheme {
@@ -61,8 +64,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Root(
                         userViewModel = userViewModel,
-                        mapViewModel = mapViewModel,
-                        keyHash = keyHash
+                        mapViewModel = mapViewModel
                     )
                 }
             }
@@ -91,16 +93,16 @@ sealed class Screen(val route: String) {
 
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Root(
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
-    keyHash: String
 ) {
     val navController = rememberNavController()
 
     LaunchedEffect(Unit) {
-        userViewModel.getUserByKeyHash(keyHash)
+        userViewModel.getUserByKeyHash()
     }
 
     val user by userViewModel.user.observeAsState()
@@ -116,7 +118,7 @@ fun Root(
                 }
 
                 composable(route = Screen.BottomNavScreen.Add.route) {
-                    AddScreen(mapViewModel)
+                    AddScreen(user, mapViewModel, userViewModel)
                 }
 
                 composable(route = Screen.BottomNavScreen.Profile.route) {
