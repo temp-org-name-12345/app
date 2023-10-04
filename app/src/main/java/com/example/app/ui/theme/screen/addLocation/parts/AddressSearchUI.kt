@@ -63,13 +63,22 @@ internal fun AddressSearchUI(
         iconColorDecider = true
     }
 
-    val onSearchResultAndTextVisible = { input: String ->
+    val onSearchResultAndTextVisible = { ip: String ->
+        val input = ip.trim()
+
         if (input.isEmpty()) {
             toastWarningMessage("주소를 검색해주세요!")
         }
 
         else {
-            onLocationSearch(input)
+            if (input == "비루개") {
+                onLocationSearch("경기도 남양주시 별내면 용암비루개길 219-88")
+            }
+
+            else {
+                onLocationSearch(input)
+            }
+
             searchTextAlpha = 1f
             lazyColumnAlpha = 1f
             selectedAddress = null
@@ -136,17 +145,28 @@ internal fun AddressSearchUI(
             modifier = Modifier
                 .alpha(searchTextAlpha)
         ) {
-            Text(
-                text = "${searchInfo?.meta?.totalCount ?: 0}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
 
-            Text(
-                text = "개의 결과가 검색되었습니다",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
+            if (searchInfo?.meta?.totalCount == null || searchInfo.meta.totalCount == 0) {
+                Text(
+                    text = "검색 결과가 없습니다",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            }
+
+            else {
+                Text(
+                    text = "${searchInfo.meta.totalCount}",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp
+                )
+
+                Text(
+                    text = "개의 결과가 검색되었습니다",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
         }
 
         LazyColumn(

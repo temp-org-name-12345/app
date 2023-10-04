@@ -145,6 +145,7 @@ fun AddScreen(
 
                     5 -> {
                         PhotoAddUI(
+                            userViewModel = userViewModel
                         ) {
                             ToNextOrSubmitButton(onButtonHandle = onNextInput)
                         }
@@ -152,11 +153,7 @@ fun AddScreen(
 
                     6 -> {
                         SubmitResultUI(
-                            selectedAddress = selectedAddress,
-                            buildingAddress = buildingInput,
-                            visitDate = dateState,
-                            isSpecial = isSpecial,
-                            photos = listOf()
+                            userViewModel = userViewModel
                         ) {
                             ToNextOrSubmitButton(
                                 text = "제출하기",
@@ -164,9 +161,7 @@ fun AddScreen(
                             )
                         }
                     }
-
                 }
-
             }
         }
     }

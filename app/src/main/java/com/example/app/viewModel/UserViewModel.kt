@@ -1,6 +1,7 @@
 package com.example.app.viewModel
 
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.widget.DatePicker
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
@@ -103,6 +104,14 @@ class UserViewModel(
         _dateState.value = LocalDateTime.of(year, month + 1, dayOfMonth, hour, min)
     }
 
+    /* 유저 사진 선택 State */
+    private val _selectedImages : MutableLiveData<List<Uri>> = MutableLiveData()
+    val selectedImages : LiveData<List<Uri>> get() = _selectedImages
+
+    fun setSelectedImages(uris: List<@JvmSuppressWildcards Uri>) {
+        _selectedImages.value = uris
+    }
+
     /* isSpecial 여부 */
     private val _isSpecial : MutableLiveData<Boolean> = MutableLiveData(false)
     val isSpecial : LiveData<Boolean> get() = _isSpecial
@@ -127,4 +136,6 @@ class UserViewModel(
             userRetrofitRepository.addLocationReq(images, jsonBody)
         }
     }
+
+
 }

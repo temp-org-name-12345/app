@@ -1,54 +1,33 @@
 package com.example.app.ui.theme.screen.addLocation.parts
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import com.example.app.model.RoadAddress
-import java.time.LocalDateTime
+import com.example.app.viewModel.UserViewModel
 
 @Composable
 internal fun SubmitResultUI(
-    selectedAddress: RoadAddress?,
-    buildingAddress: String,
-    visitDate: LocalDateTime?,
-    isSpecial: Boolean?,
-    photos: List<Uri?>,
+    userViewModel: UserViewModel,
     SubmitButton: @Composable () -> Unit
 ) {
     Row {
         Text(text = "주소명: ")
-        Text(text = selectedAddress?.fullAddress ?: "선택 없음")
-    }
-
-    Row {
-        Text(text = "위도: ")
-        Text(text = selectedAddress?.lat ?: "선택 없음")
-    }
-
-    Row {
-        Text(text = "경도: ")
-        Text(text = selectedAddress?.lng ?: "선택 없음")
-    }
-
-    Row {
-        Text(text = "장소명: ")
-        Text(text = buildingAddress)
+        Text(text = userViewModel.selectedAddress.value.toString())
     }
 
     Row {
         Text(text = "방문일시: ")
-        Text(text = visitDate?.toString() ?: "선택 없음")
+        Text(text = userViewModel.dateState.value.toString())
     }
 
     Row {
         Text(text = "Special: ")
-        Text(text = isSpecial?.toString() ?: "false")
+        Text(text = userViewModel.isSpecial.value.toString())
     }
 
     Row {
         Text(text = "사진: ")
-        Text(text = photos.toString())
+        Text(text = userViewModel.selectedImages.value.toString())
     }
 
     SubmitButton()
