@@ -23,7 +23,7 @@ import com.example.app.ui.theme.CustomColor
 @Composable
 fun ToNextOrSubmitButton(
     text: String = "다음",
-    enabled: Boolean = true,
+    isButtonEnabled: Boolean = true,
     onButtonHandle: () -> Unit
 ) {
     Button(
@@ -31,7 +31,7 @@ fun ToNextOrSubmitButton(
             .fillMaxWidth()
             .padding(32.dp),
 
-        enabled = enabled,
+        enabled = isButtonEnabled,
 
         colors = ButtonDefaults.buttonColors(
             backgroundColor = CustomColor.ButtonBackgroundColor,
@@ -52,9 +52,10 @@ fun ToNextOrSubmitButton(
     ) {
         Icon(
             imageVector =
-            if (text == "다음") Icons.Default.Check
-            else Icons.Default.Send,
-            contentDescription = null)
+                if (text == "다음") Icons.Default.Check
+                else Icons.Default.Send,
+            contentDescription = null
+        )
 
         Spacer(modifier = Modifier.width(width = 8.dp))
 
@@ -62,7 +63,7 @@ fun ToNextOrSubmitButton(
             text = text,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
-            color = if (enabled) Color.White else Color.Gray
+            color = if (isButtonEnabled) Color.White else Color.Gray
         )
     }
 }

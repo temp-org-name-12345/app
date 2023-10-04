@@ -1,4 +1,4 @@
-package com.example.app.ui.theme.screen.addLocation.parts
+package com.example.app.ui.theme.screen.addScreen.parts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -133,7 +133,7 @@ internal fun AddressSearchUI(
 
     ToNextOrSubmitButton(
         onButtonHandle = onNextInput,
-        enabled = !searchBarEnable
+        isButtonEnabled = !searchBarEnable
     )
 
     Column(

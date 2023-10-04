@@ -1,4 +1,4 @@
-package com.example.app.ui.theme.screen.addLocation.parts
+package com.example.app.ui.theme.screen.addScreen.parts
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
@@ -37,7 +37,7 @@ internal fun BuildingInputUI(
 
     val onCheckButtonClick = {
 
-        if (buildingInput.isEmpty()) {
+        if (buildingInput.trim().isEmpty()) {
             toastWarningMessage("장소명을 입력해주세요!")
         }
 
@@ -85,7 +85,7 @@ internal fun BuildingInputUI(
     )
 
     ToNextOrSubmitButton(
-        enabled = buttonEnable,
+        isButtonEnabled = buttonEnable,
         onButtonHandle = onNextInput
     )
 }

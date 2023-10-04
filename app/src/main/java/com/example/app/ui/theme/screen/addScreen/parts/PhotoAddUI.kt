@@ -1,5 +1,6 @@
-package com.example.app.ui.theme.screen.addLocation.parts
+package com.example.app.ui.theme.screen.addScreen.parts
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,25 +14,21 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.app.viewModel.UserViewModel
 
 @Composable
 internal fun PhotoAddUI(
-    userViewModel: UserViewModel,
+    selectedImageUris: List<Uri>,
+    setSelectedImageUris: (List<Uri>) -> Unit,
     NextButton: @Composable () -> Unit
 ) {
     Text(text = "사진을 추가해주세요")
 
-    val selectedImageUris by userViewModel.selectedImages.observeAsState()
-
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
-        onResult = { uris -> userViewModel.setSelectedImages(uris) }
+        onResult = { uris -> setSelectedImageUris(uris) }
     )
 
     Button(onClick = {
@@ -53,7 +50,7 @@ internal fun PhotoAddUI(
             bottom = 16.dp
         )
     ) {
-        items(selectedImageUris ?: emptyList()) { uri ->
+        items(selectedImageUris) { uri ->
             Card(
                 modifier = Modifier
                     .padding(4.dp)

@@ -2,7 +2,7 @@ package com.example.app.dao
 
 import com.example.app.model.User
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -12,6 +12,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Query
+import java.time.LocalDate
 
 interface UserRetrofitDao {
     companion object {
@@ -44,8 +45,15 @@ interface UserRetrofitDao {
 
     @Multipart
     @POST("upload")
-    suspend fun uploadLocation(
-        @Part images: List<MultipartBody.Part?>,
-        @Part("meta") metaData: RequestBody
-    ) : Response<Unit>
+    fun uploadLocation(
+        @Part images: List<MultipartBody.Part>,
+        @Part("userId") userId: Int,
+        @Part("lat") lat: Double,
+        @Part("lng") lng: Double,
+        @Part("visitDate") visitDate: LocalDate,
+        @Part("isSpecial") isSpecial: Boolean,
+        @Part("addressName") addressName: String,
+        @Part("storeName") storeName: String,
+        @Part("fullAddressName") fullAddressName: String
+    ) : Call<String>
 }

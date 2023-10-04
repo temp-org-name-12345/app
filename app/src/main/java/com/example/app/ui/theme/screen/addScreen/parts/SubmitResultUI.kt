@@ -1,4 +1,4 @@
-package com.example.app.ui.theme.screen.addLocation.parts
+package com.example.app.ui.theme.screen.addScreen.parts
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Text

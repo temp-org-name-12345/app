@@ -1,4 +1,4 @@
-package com.example.app.ui.theme.screen.addLocation.parts
+package com.example.app.ui.theme.screen.addScreen.parts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 @Composable
 internal fun CheckBoxUI(
     isSpecial: Boolean,

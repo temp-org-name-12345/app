@@ -2,11 +2,11 @@ package com.example.app.repository
 
 import android.util.Log
 import com.example.app.dao.UserRetrofitDao
-import com.example.app.model.AddLocationReq
 import com.example.app.model.User
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import retrofit2.Call
 import retrofit2.Response
+import java.time.LocalDate
 
 class UserRetrofitRepository {
     companion object {
@@ -34,16 +34,36 @@ class UserRetrofitRepository {
             .getAppThumbnail()
             .also { logging("getAppThumbnail()", it) }
 
-    suspend fun addLocationReq(images: List<MultipartBody.Part?>, req: RequestBody) : Response<Unit> =
-        userRetrofitDao
-            .uploadLocation(images, req)
-            .also { logging("addLocationReq", req) }
+    fun addLocationReq(
+        images: List<MultipartBody.Part?>,
+        userId: Int,
+        lat: Double,
+        lng: Double,
+        visitDate: LocalDate,
+        isSpecial: Boolean,
+        addressName: String,
+        storeName: String,
+        fullAddressName: String
+    ) : Call<String> =
 
-    /*
-    suspend fun uploadTest(image: MultipartBody.Part) =
-        userRetrofitDao
-            .uploadLocation(image)
-            .also { logging("uploadTest", image) }
+        images
+            .filterNotNull()
+            .let {
+                Log.e("UserRetrofitRepository", "it = $it")
 
-     */
+                userRetrofitDao.uploadLocation(
+                    images = it,
+                    userId = userId,
+                    lat = lat,
+                    lng = lng,
+                    visitDate = visitDate,
+                    isSpecial = isSpecial,
+                    addressName = addressName,
+                    storeName = storeName,
+                    fullAddressName = fullAddressName
+                )
+            }
+            .also {
+                logging("addLocationReq", it)
+            }
 }

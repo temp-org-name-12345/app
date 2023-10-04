@@ -1,9 +1,12 @@
 package com.example.app.viewModel
 
-import android.app.DatePickerDialog
+import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.DatePicker
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,13 +18,18 @@ import com.example.app.model.User
 import com.example.app.repository.UserRetrofitRepository
 import kotlinx.coroutines.launch
 import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import org.json.JSONObject
-import retrofit2.http.Multipart
+import okio.BufferedSink
+import okio.source
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Calendar
+import java.util.UUID
 
 class UserViewModelFactory(private val keyHash: String) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -93,6 +101,11 @@ class UserViewModel(
         addr?.let { _selectedAddress.value = it }
     }
 
+    /* Building Input 정보 */
+    private val _buildingInput : MutableLiveData<String> = MutableLiveData("")
+    val buildingInput : LiveData<String> get() = _buildingInput
+    val onBuildingInputChanged = { input: String -> _buildingInput.value = input }
+
     /* 유저 날짜 선택 State */
     private val _dateState : MutableLiveData<LocalDateTime> = MutableLiveData()
     val dateState : LiveData<LocalDateTime> get() = _dateState
@@ -105,12 +118,9 @@ class UserViewModel(
     }
 
     /* 유저 사진 선택 State */
-    private val _selectedImages : MutableLiveData<List<Uri>> = MutableLiveData()
+    private val _selectedImages : MutableLiveData<List<Uri>> = MutableLiveData(emptyList())
     val selectedImages : LiveData<List<Uri>> get() = _selectedImages
-
-    fun setSelectedImages(uris: List<@JvmSuppressWildcards Uri>) {
-        _selectedImages.value = uris
-    }
+    val onImagesSelected = { uris: List<@JvmSuppressWildcards Uri> -> _selectedImages.value = uris }
 
     /* isSpecial 여부 */
     private val _isSpecial : MutableLiveData<Boolean> = MutableLiveData(false)
@@ -118,24 +128,95 @@ class UserViewModel(
     val onIsSpecialChanged = { it: Boolean -> _isSpecial.value = it }
 
     /* 장소 등록 */
-    fun addLocationReq(images: List<MultipartBody.Part?>, req: AddLocationReq) {
-        viewModelScope.launch {
-            val jsonObj = JSONObject(
-                "{" +
-                        "\"userId\":\"${req.userId}\"," +
-                        "\"lat\":\"${req.lat}\"," +
-                        "\"lng\":\"${req.lng}\"," +
-                        "\"visitDate\":\"${req.visitDate}\"," +
-                        "\"isSpecial\":\"${req.isSpecial}\"," +
-                        "\"name\":\"${req.addressName}\"," +
-                        "\"name\":\"${req.storeName}\"" +
-                    "}"
-            ).toString()
+    private fun addLocationReq(images: List<MultipartBody.Part?>, req: AddLocationReq) {
+        val result = userRetrofitRepository.addLocationReq(
+            images = images,
+            userId = req.userId ?: -1,
+            lat = req.lat ?: 0.0,
+            lng = req.lng ?: 0.0,
+            visitDate = req.visitDate?.toLocalDate() ?: LocalDate.now(),
+            isSpecial = req.isSpecial ?: false,
+            addressName = req.addressName ?: "",
+            storeName = req.storeName ?: "",
+            fullAddressName = "${req.addressName} ${req.storeName}"
+        )
 
-            val jsonBody = RequestBody.create("application/json".toMediaTypeOrNull(), jsonObj)
-            userRetrofitRepository.addLocationReq(images, jsonBody)
-        }
+        result.enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                _submitResponse.value = response.body()
+                Log.e("UserViewModel", "res = ${response}")
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.e("UserViewModel", "err = ${t}")
+            }
+        })
     }
 
+    /* SUBMIT */
+    private val _submitButtonEnabled : MutableLiveData<Boolean> = MutableLiveData(true)
+    val submitButtonEnabled : LiveData<Boolean> get() = _submitButtonEnabled
 
+    fun handleSubmitButtonEnable() {
+        val v = _submitButtonEnabled.value ?: true
+        _submitButtonEnabled.value = !v
+    }
+
+    private val _submitResponse : MutableLiveData<String> = MutableLiveData("")
+    val submitResponse : LiveData<String> get() = _submitResponse
+
+    fun onSubmitButtonClick(context: Context) {
+        val req = AddLocationReq(
+            lat = selectedAddress.value?.lat?.toDouble(),
+            lng = selectedAddress.value?.lng?.toDouble(),
+            addressName = selectedAddress.value?.fullAddress,
+            storeName = buildingInput.value ?: "",
+            visitDate = dateState.value ?: LocalDateTime.now(),
+            isSpecial = isSpecial.value ?: false,
+            userId = user.value?.id
+        )
+
+        val parts = selectedImages.value
+            ?.map { item ->
+                val ret = item.asMultipart(
+                    UUID.randomUUID().toString(),
+                    context.contentResolver
+                )
+                ret
+            }
+            ?: listOf()
+
+        addLocationReq(parts, req)
+    }
+
+    /* uiVisible */
+    private val _uiVisible : MutableLiveData<Int> = MutableLiveData(1)
+
+    val uiVisible : LiveData<Int> get() = _uiVisible
+    val onNextInput = { _uiVisible.value = _uiVisible.value!! + 1 }
+
+    // 선택된 파일의 uri -> multipart
+    // 출처 : https://ohdbjj.tistory.com/49
+    @SuppressLint("Range")
+    fun Uri.asMultipart(name: String, contentResolver: ContentResolver): MultipartBody.Part? {
+        return contentResolver.query(this, null, null, null, null)?.let {
+            if (it.moveToNext()) {
+                val displayName = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                val requestBody = object : RequestBody() {
+                    override fun contentType(): MediaType? {
+                        return contentResolver.getType(this@asMultipart)?.toMediaType()
+                    }
+
+                    override fun writeTo(sink: BufferedSink) {
+                        sink.writeAll(contentResolver.openInputStream(this@asMultipart)?.source()!!)
+                    }
+                }
+                it.close()
+                MultipartBody.Part.createFormData(name, displayName, requestBody)
+            } else {
+                it.close()
+                null
+            }
+        }
+    }
 }

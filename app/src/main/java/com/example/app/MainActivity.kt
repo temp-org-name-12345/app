@@ -33,7 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.app.ui.theme.AppTheme
-import com.example.app.ui.theme.screen.addLocation.AddScreen
+import com.example.app.ui.theme.screen.addScreen.AddScreen
 import com.example.app.ui.theme.screen.MapScreen
 import com.example.app.ui.theme.screen.ProfileScreen
 import com.example.app.ui.theme.screen.UserScreen
@@ -115,7 +115,8 @@ fun Root(
                 }
 
                 composable(route = Screen.BottomNavScreen.Add.route) {
-                    AddScreen(user, mapViewModel, userViewModel)
+                    val onPostSubmitRoute = { navController.navigate(Screen.User.route) }
+                    AddScreen(mapViewModel, userViewModel, onPostSubmitRoute)
                 }
 
                 composable(route = Screen.BottomNavScreen.Profile.route) {

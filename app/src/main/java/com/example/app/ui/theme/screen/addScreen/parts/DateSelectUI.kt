@@ -1,4 +1,4 @@
-package com.example.app.ui.theme.screen.addLocation.parts
+package com.example.app.ui.theme.screen.addScreen.parts
 
 import android.app.DatePickerDialog
 import androidx.compose.material.Icon
@@ -39,7 +39,7 @@ internal fun DateSelectUI(
     }
 
     ToNextOrSubmitButton(
-        enabled = dateState != null,
+        isButtonEnabled = dateState != null,
         onButtonHandle = onNextInput
     )
 }

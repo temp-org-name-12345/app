@@ -1,4 +1,4 @@
-package com.example.app.ui.theme.screen.addLocation
+package com.example.app.ui.theme.screen.addScreen
 
 import android.app.DatePickerDialog
 import android.widget.Toast
@@ -11,35 +11,33 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import com.example.app.model.AddLocationReq
-import com.example.app.model.User
 import com.example.app.ui.theme.common.ToNextOrSubmitButton
-import com.example.app.ui.theme.screen.addLocation.parts.AddressSearchUI
-import com.example.app.ui.theme.screen.addLocation.parts.BuildingInputUI
-import com.example.app.ui.theme.screen.addLocation.parts.CheckBoxUI
-import com.example.app.ui.theme.screen.addLocation.parts.DateSelectUI
-import com.example.app.ui.theme.screen.addLocation.parts.PhotoAddUI
-import com.example.app.ui.theme.screen.addLocation.parts.SubmitResultUI
+import com.example.app.ui.theme.screen.addScreen.parts.AddressSearchUI
+import com.example.app.ui.theme.screen.addScreen.parts.BuildingInputUI
+import com.example.app.ui.theme.screen.addScreen.parts.CheckBoxUI
+import com.example.app.ui.theme.screen.addScreen.parts.DateSelectUI
+import com.example.app.ui.theme.screen.addScreen.parts.PhotoAddUI
+import com.example.app.ui.theme.screen.addScreen.parts.SubmitResultUI
 import com.example.app.viewModel.MapViewModel
 import com.example.app.viewModel.UserViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddScreen(
-    user: User?,
     mapViewModel: MapViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    onPostSubmitRoute: () -> Unit
 ) {
     /* CONTEXT */
     val context = LocalContext.current
@@ -50,15 +48,12 @@ fun AddScreen(
     val searchInput by userViewModel.searchInput.observeAsState()
     val dateState by userViewModel.dateState.observeAsState()
     val isSpecial by userViewModel.isSpecial.observeAsState()
-    val selectedAddress by userViewModel.selectedAddress.observeAsState()
+    val buildingInput by userViewModel.buildingInput.observeAsState()
+    val uiVisible by userViewModel.uiVisible.observeAsState()
+    val selectedImageUris by userViewModel.selectedImages.observeAsState()
+    val submitButtonEnabled by userViewModel.submitButtonEnabled.observeAsState()
 
-    /* HANDLER */
-    var uiVisible by rememberSaveable { mutableIntStateOf(1) }
-    val onNextInput = { uiVisible += 1 }
-
-    var buildingInput by rememberSaveable { mutableStateOf("") }
-    val onBuildingInputChanged = { input: String -> buildingInput = input }
-
+    /* Handler */
     val toastWarningMessage = { message: String ->
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
@@ -66,27 +61,13 @@ fun AddScreen(
     /* DATE_PICKER */
     val calendar = Calendar.getInstance()
     val datePickerDialog = DatePickerDialog(
-        LocalContext.current,
+        context,
         userViewModel.onDateSetListener,
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    /* SUBMIT */
-    val onSubmit = {
-        val req = AddLocationReq(
-            lat = selectedAddress?.lat?.toDouble(),
-            lng = selectedAddress?.lng?.toDouble(),
-            addressName = selectedAddress?.fullAddress,
-            storeName = buildingInput,
-            visitDate = dateState,
-            isSpecial = isSpecial,
-            userId = user?.id
-        )
-
-        userViewModel.addLocationReq(listOf(), req)
-    }
 
     Scaffold { innerPadding ->
         Box(
@@ -111,17 +92,17 @@ fun AddScreen(
                             onLocationSearch = mapViewModel.onLocationSearch,
                             onAddressSelected = userViewModel.onAddressSelected,
                             keyboardController = keyboardController,
-                            onNextInput = onNextInput,
+                            onNextInput = userViewModel.onNextInput,
                             toastWarningMessage = toastWarningMessage
                         )
                     }
 
                     2 -> {
                         BuildingInputUI(
-                            buildingInput = buildingInput,
+                            buildingInput = buildingInput ?: "",
                             keyboardController = keyboardController,
-                            onBuildingInputChanged = onBuildingInputChanged,
-                            onNextInput = onNextInput,
+                            onBuildingInputChanged = userViewModel.onBuildingInputChanged,
+                            onNextInput = userViewModel.onNextInput,
                             toastWarningMessage = toastWarningMessage
                         )
                     }
@@ -130,7 +111,7 @@ fun AddScreen(
                         DateSelectUI(
                             datePickerDialog = datePickerDialog,
                             dateState = dateState,
-                            onNextInput = onNextInput
+                            onNextInput = userViewModel.onNextInput
                         )
                     }
 
@@ -139,26 +120,38 @@ fun AddScreen(
                             isSpecial = isSpecial ?: false,
                             onIsSpecialChanged = userViewModel.onIsSpecialChanged,
                         ) {
-                            ToNextOrSubmitButton(onButtonHandle = onNextInput)
+                            ToNextOrSubmitButton(
+                                onButtonHandle = userViewModel.onNextInput
+                            )
                         }
                     }
 
                     5 -> {
                         PhotoAddUI(
-                            userViewModel = userViewModel
+                            selectedImageUris = selectedImageUris ?: emptyList(),
+                            setSelectedImageUris = userViewModel.onImagesSelected,
+
                         ) {
-                            ToNextOrSubmitButton(onButtonHandle = onNextInput)
+                            ToNextOrSubmitButton(onButtonHandle = userViewModel.onNextInput)
                         }
                     }
 
                     6 -> {
+                        val coroutineScope = rememberCoroutineScope()
+
                         SubmitResultUI(
                             userViewModel = userViewModel
                         ) {
                             ToNextOrSubmitButton(
-                                text = "제출하기",
-                                onButtonHandle = onSubmit
-                            )
+                                text = "제출",
+                                isButtonEnabled = submitButtonEnabled ?: true
+                            ) {
+                                coroutineScope.launch {
+                                    userViewModel.handleSubmitButtonEnable()
+                                    userViewModel.onSubmitButtonClick(context)
+                                    onPostSubmitRoute()
+                                }
+                            }
                         }
                     }
                 }
