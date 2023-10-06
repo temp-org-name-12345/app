@@ -26,9 +26,7 @@ import com.example.app.ui.theme.screen.addScreen.parts.PhotoAddUI
 import com.example.app.ui.theme.screen.addScreen.parts.SubmitResultUI
 import com.example.app.viewModel.MapViewModel
 import com.example.app.viewModel.UserViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
 
@@ -67,7 +65,6 @@ fun AddScreen(
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
-
 
     Scaffold { innerPadding ->
         Box(

@@ -1,6 +1,5 @@
 package com.example.app.model
 
-import java.time.LocalDateTime
 
 
 data class User(
@@ -14,7 +13,9 @@ data class User(
 data class AddLocationReq(
     val lat: Double?,
     val lng: Double?,
-    val visitDate: LocalDateTime?,
+    val year: Int,
+    val month: Int,
+    val day: Int,
     val isSpecial: Boolean?,
     val addressName: String?,
     val storeName: String?,

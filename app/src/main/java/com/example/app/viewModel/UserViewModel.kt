@@ -27,8 +27,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.Calendar
 import java.util.UUID
 
 class UserViewModelFactory(private val keyHash: String) : ViewModelProvider.Factory {
@@ -107,14 +105,11 @@ class UserViewModel(
     val onBuildingInputChanged = { input: String -> _buildingInput.value = input }
 
     /* 유저 날짜 선택 State */
-    private val _dateState : MutableLiveData<LocalDateTime> = MutableLiveData()
-    val dateState : LiveData<LocalDateTime> get() = _dateState
+    private val _dateState : MutableLiveData<LocalDate> = MutableLiveData()
+    val dateState : LiveData<LocalDate> get() = _dateState
 
     val onDateSetListener = { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR)
-        val min = calendar.get(Calendar.MINUTE)
-        _dateState.value = LocalDateTime.of(year, month + 1, dayOfMonth, hour, min)
+        _dateState.value = LocalDate.of(year, month + 1, dayOfMonth)
     }
 
     /* 유저 사진 선택 State */
@@ -131,24 +126,17 @@ class UserViewModel(
     private fun addLocationReq(images: List<MultipartBody.Part?>, req: AddLocationReq) {
         val result = userRetrofitRepository.addLocationReq(
             images = images,
-            userId = req.userId ?: -1,
-            lat = req.lat ?: 0.0,
-            lng = req.lng ?: 0.0,
-            visitDate = req.visitDate?.toLocalDate() ?: LocalDate.now(),
-            isSpecial = req.isSpecial ?: false,
-            addressName = req.addressName ?: "",
-            storeName = req.storeName ?: "",
-            fullAddressName = "${req.addressName} ${req.storeName}"
+            req = req
         )
 
         result.enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 _submitResponse.value = response.body()
-                Log.e("UserViewModel", "res = ${response}")
+                Log.e("UserViewModel", "res = $response")
             }
 
             override fun onFailure(call: Call<String>, t: Throwable) {
-                Log.e("UserViewModel", "err = ${t}")
+                Log.e("UserViewModel", "err = $t")
             }
         })
     }
@@ -166,12 +154,16 @@ class UserViewModel(
     val submitResponse : LiveData<String> get() = _submitResponse
 
     fun onSubmitButtonClick(context: Context) {
+        val date = dateState.value ?: LocalDate.now()
+
         val req = AddLocationReq(
             lat = selectedAddress.value?.lat?.toDouble(),
             lng = selectedAddress.value?.lng?.toDouble(),
             addressName = selectedAddress.value?.fullAddress,
             storeName = buildingInput.value ?: "",
-            visitDate = dateState.value ?: LocalDateTime.now(),
+            year = date.year,
+            month = date.monthValue,
+            day = date.dayOfMonth,
             isSpecial = isSpecial.value ?: false,
             userId = user.value?.id
         )
@@ -179,7 +171,7 @@ class UserViewModel(
         val parts = selectedImages.value
             ?.map { item ->
                 val ret = item.asMultipart(
-                    UUID.randomUUID().toString(),
+                    "images",
                     context.contentResolver
                 )
                 ret

@@ -1,18 +1,20 @@
 package com.example.app.dao
 
+import com.example.app.model.AddLocationReq
 import com.example.app.model.User
+import com.google.gson.GsonBuilder
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Query
-import java.time.LocalDate
 
 interface UserRetrofitDao {
     companion object {
@@ -23,9 +25,14 @@ interface UserRetrofitDao {
         private const val domain = "http://$host:$port/$version/$prefix/"
 
         private val retrofit : Retrofit by lazy {
+            val gson = GsonBuilder()
+                .setLenient()
+                .create()
+
             Retrofit.Builder()
                 .baseUrl(domain)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(ScalarsConverterFactory.create())  // String 응답처리 Converter
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
         }
 
@@ -47,13 +54,6 @@ interface UserRetrofitDao {
     @POST("upload")
     fun uploadLocation(
         @Part images: List<MultipartBody.Part>,
-        @Part("userId") userId: Int,
-        @Part("lat") lat: Double,
-        @Part("lng") lng: Double,
-        @Part("visitDate") visitDate: LocalDate,
-        @Part("isSpecial") isSpecial: Boolean,
-        @Part("addressName") addressName: String,
-        @Part("storeName") storeName: String,
-        @Part("fullAddressName") fullAddressName: String
+        @Part("req") req: AddLocationReq
     ) : Call<String>
 }
