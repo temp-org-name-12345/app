@@ -52,7 +52,7 @@ data class Address(
 /* 도로명 주소 상세 정보 */
 data class RoadAddress(
     @SerializedName("address_name")
-    val addressName: String,
+    var addressName: String,
 
     @SerializedName("building_name")
     val buildingName: String,

@@ -94,7 +94,9 @@ internal fun AddressSearchUI(
     )
 
     OutlinedTextField(
-        value = if (searchBarEnable) searchInput else selectedAddress?.fullAddress ?: "",
+        value =
+            if (searchBarEnable) searchInput
+            else selectedAddress?.fullAddress ?: selectedAddress?.addressName ?: "",
 
         onValueChange = onSearchInputChanged,
 
@@ -181,15 +183,23 @@ internal fun AddressSearchUI(
 
                     Card(
                         modifier = Modifier
-                            .clickable { onAddressSelectedAndInvisible(item.roadAddress) }
+                            .clickable {
+                                val addr = item.roadAddress
+
+                                if (addr?.addressName == null) {
+                                    addr?.addressName = item.address?.addressName ?: item.addressName
+                                }
+
+                                onAddressSelectedAndInvisible(addr)
+                            }
                             .padding(24.dp)
                             .background(Color.White)
 
                     ) {
-                        val address = item.roadAddress?.fullAddress
+                        val address = item.roadAddress?.fullAddress ?: item.address?.addressName ?: item.addressName
 
                         Text(
-                            text = "$address",
+                            text = address,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )

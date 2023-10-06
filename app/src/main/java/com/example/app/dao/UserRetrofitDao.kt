@@ -4,7 +4,6 @@ import com.example.app.model.AddLocationReq
 import com.example.app.model.User
 import com.google.gson.GsonBuilder
 import okhttp3.MultipartBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -51,9 +50,14 @@ interface UserRetrofitDao {
     suspend fun getAppThumbnail() : Response<List<String>>
 
     @Multipart
-    @POST("upload")
-    fun uploadLocation(
+    @POST("upload/new")
+    suspend fun uploadNewLocation(
         @Part images: List<MultipartBody.Part>,
         @Part("req") req: AddLocationReq
-    ) : Call<String>
+    ) : Response<ImageUploadRes>
 }
+
+data class ImageUploadRes(
+    val imageUrls: List<String>,
+    val data: AddLocationReq
+)

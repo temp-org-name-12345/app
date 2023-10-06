@@ -9,8 +9,8 @@ import com.example.app.viewModel.UserViewModel
 
 @Composable
 fun UserScreen(userViewModel: UserViewModel) {
-    val submitResponse by userViewModel.submitResponse.observeAsState()
+    val locationRes by userViewModel.locationRes.observeAsState()
 
     Text("UserScreen")
-    Text(text = submitResponse ?: "null")
+    Text(text = locationRes?.toString() ?: "null")
 }

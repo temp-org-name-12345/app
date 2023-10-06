@@ -1,6 +1,14 @@
 package com.example.app.model
 
+import java.io.Serializable
 
+data class Res<T> (
+    val code: String?,
+    val message: String?,
+    val status: Int,
+    val data: T,
+    val isLoading: Boolean = false
+)
 
 data class User(
     var id: Int? = null,
@@ -8,7 +16,7 @@ data class User(
     val profileUrl: String,
     val email: String,
     val keyHash: String
-)
+) : Serializable
 
 data class AddLocationReq(
     val lat: Double?,

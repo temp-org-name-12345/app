@@ -1,24 +1,19 @@
 package com.example.app.util
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import com.example.app.MainActivity
 import com.example.app.model.User
-import com.example.app.viewModel.UserViewModel
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 
-object KakaoLogin {
-    private const val TAG = "Kakao Login"
+class KakaoLogin {
+    companion object {
+        private val TAG = "Kakao Login"
+    }
 
-    fun login(context: Context, keyHash: String, viewModel: UserViewModel) {
-        val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
-            if (error != null) Log.e(TAG, "로그인 실패 $error")
-            else if (token != null) Log.e(TAG, "로그인 성공 ${token.accessToken} ${token.idToken}")
-        }
+    fun login(context: Context, keyHash: String, saveAndNavToMap: (User) -> Unit) {
 
         val instance = UserApiClient.instance
 
@@ -34,6 +29,11 @@ object KakaoLogin {
                     }
 
                     else {
+                        val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
+                            if (error != null) Log.e(TAG, "로그인 실패 $error")
+                            else if (token != null) Log.e(TAG, "로그인 성공 ${token.accessToken} ${token.idToken}")
+                        }
+
                         instance.loginWithKakaoAccount(context, callback = mCallback)
                     }
                 }
@@ -51,17 +51,14 @@ object KakaoLogin {
                 val email = account?.email
                 val profileUrl = account?.profile?.profileImageUrl
 
-                viewModel.saveUser(
-                    User(
-                        nickname = nickname!!,
-                        email = email!!,
-                        profileUrl = profileUrl!!,
-                        keyHash = keyHash
-                    )
+                val kakaoUser = User(
+                    nickname = nickname!!,
+                    email = email!!,
+                    profileUrl = profileUrl!!,
+                    keyHash = keyHash
                 )
 
-                val intent = Intent(context, MainActivity::class.java)
-                context.startActivity(intent)
+                saveAndNavToMap(kakaoUser)
             }
         }
     }

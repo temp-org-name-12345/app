@@ -17,6 +17,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.example.app.ui.theme.common.LoadingIndicator
 import com.example.app.ui.theme.common.ToNextOrSubmitButton
 import com.example.app.ui.theme.screen.addScreen.parts.AddressSearchUI
 import com.example.app.ui.theme.screen.addScreen.parts.BuildingInputUI
@@ -26,7 +27,11 @@ import com.example.app.ui.theme.screen.addScreen.parts.PhotoAddUI
 import com.example.app.ui.theme.screen.addScreen.parts.SubmitResultUI
 import com.example.app.viewModel.MapViewModel
 import com.example.app.viewModel.UserViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 
@@ -65,6 +70,8 @@ fun AddScreen(
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
+
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold { innerPadding ->
         Box(
@@ -134,11 +141,11 @@ fun AddScreen(
                     }
 
                     6 -> {
-                        val coroutineScope = rememberCoroutineScope()
-
                         SubmitResultUI(
-                            userViewModel = userViewModel
+                            userViewModel = userViewModel,
+                            submitButtonEnabled = submitButtonEnabled ?: true
                         ) {
+
                             ToNextOrSubmitButton(
                                 text = "제출",
                                 isButtonEnabled = submitButtonEnabled ?: true

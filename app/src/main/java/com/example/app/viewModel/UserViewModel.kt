@@ -5,34 +5,32 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import android.widget.DatePicker
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.app.dao.ImageUploadRes
 import com.example.app.model.AddLocationReq
 import com.example.app.model.RoadAddress
 import com.example.app.model.User
 import com.example.app.repository.UserRetrofitRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okio.BufferedSink
 import okio.source
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.time.LocalDate
-import java.util.UUID
 
-class UserViewModelFactory(private val keyHash: String) : ViewModelProvider.Factory {
+class UserViewModelFactory() : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-            return UserViewModel(keyHash) as T
+            return UserViewModel() as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel Class")
@@ -40,8 +38,7 @@ class UserViewModelFactory(private val keyHash: String) : ViewModelProvider.Fact
 }
 
 class UserViewModel(
-    private val keyHash: String,
-    private val userRetrofitRepository: UserRetrofitRepository = UserRetrofitRepository()
+    private val userRetrofitRepository: UserRetrofitRepository = UserRetrofitRepository
 ) : ViewModel() {
 
     private var _user : MutableLiveData<User> = MutableLiveData(null)
@@ -61,16 +58,16 @@ class UserViewModel(
         }
     }
 
-    suspend fun getUserByKeyHash() : User? {
-        val result = userRetrofitRepository.getUserByKeyHash(keyHash)
+    fun getUserByKeyHash(keyHash: String) {
+        viewModelScope.launch {
+            val result = userRetrofitRepository.getUserByKeyHash(keyHash)
 
-        if (result.isSuccessful) {
-            _user.value = result.body()
-        } else {
-            _user.value = null
+            if (result.isSuccessful) {
+                _user.value = result.body()
+            } else {
+                _user.value = null
+            }
         }
-
-        return _user.value
     }
 
     private val _thumbnailImage : MutableLiveData<List<String>> = MutableLiveData()
@@ -122,23 +119,22 @@ class UserViewModel(
     val isSpecial : LiveData<Boolean> get() = _isSpecial
     val onIsSpecialChanged = { it: Boolean -> _isSpecial.value = it }
 
+    /* Location 등록 후 정보 */
+    private val _locationRes : MutableLiveData<ImageUploadRes> = MutableLiveData()
+    val locationRes : LiveData<ImageUploadRes> get() = _locationRes
+
     /* 장소 등록 */
     private fun addLocationReq(images: List<MultipartBody.Part?>, req: AddLocationReq) {
-        val result = userRetrofitRepository.addLocationReq(
-            images = images,
-            req = req
-        )
+        viewModelScope.launch {
+            val result = userRetrofitRepository.uploadNewLocation(
+                images = images,
+                req = req
+            )
 
-        result.enqueue(object : Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                _submitResponse.value = response.body()
-                Log.e("UserViewModel", "res = $response")
+            if (result.isSuccessful) {
+                _locationRes.value = result.body()
             }
-
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Log.e("UserViewModel", "err = $t")
-            }
-        })
+        }
     }
 
     /* SUBMIT */
