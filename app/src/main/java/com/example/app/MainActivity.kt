@@ -26,6 +26,8 @@ import com.example.app.ui.theme.screen.loginScreen.LoginScreen
 import com.example.app.ui.theme.screen.splashScreen.SplashScreen
 import com.example.app.util.BottomNavGraph
 import com.example.app.util.Screen
+import com.example.app.viewModel.DefaultAppViewModel
+import com.example.app.viewModel.DefaultAppViewModelFactory
 import com.example.app.viewModel.MapViewModel
 import com.example.app.viewModel.MapViewModelFactory
 import com.example.app.viewModel.UserViewModel
@@ -42,7 +44,8 @@ class MainActivity : ComponentActivity() {
         val keyHash = Utility.getKeyHash(this)
         KakaoSdk.init(this, getString(R.string.KAKAO_NATIVE_APP_KEY))
 
-        val userViewModel = ViewModelProvider(this, UserViewModelFactory())[UserViewModel::class.java]
+        val defaultAppViewModel = ViewModelProvider(this, DefaultAppViewModelFactory())[DefaultAppViewModel::class.java]
+        val userViewModel = ViewModelProvider(this, UserViewModelFactory(key))[UserViewModel::class.java]
         val mapViewModel = ViewModelProvider(this, MapViewModelFactory(key))[MapViewModel::class.java]
 
         setContent {
@@ -52,6 +55,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     Root(
+                        defaultAppViewModel = defaultAppViewModel,
                         userViewModel = userViewModel,
                         mapViewModel = mapViewModel,
                         keyHash = keyHash
@@ -64,6 +68,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Root(
+    defaultAppViewModel: DefaultAppViewModel,
     userViewModel: UserViewModel,
     mapViewModel: MapViewModel,
     keyHash: String
@@ -82,6 +87,7 @@ fun Root(
             NavHost(navController = navController, startDestination = Screen.Splash.route) {
                 composable(route = Screen.Splash.route) {
                     SplashScreen(
+                        defaultAppViewModel = defaultAppViewModel,
                         userViewModel = userViewModel,
                         keyHash = keyHash,
                         navToLogin = navToLogin,
@@ -91,6 +97,7 @@ fun Root(
 
                 composable(route = Screen.Login.route) {
                     LoginScreen(
+                        defaultAppViewModel = defaultAppViewModel,
                         userViewModel = userViewModel,
                         keyHash = keyHash,
                         navToMap = navToMap

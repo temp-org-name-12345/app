@@ -17,7 +17,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import com.example.app.ui.theme.common.LoadingIndicator
 import com.example.app.ui.theme.common.ToNextOrSubmitButton
 import com.example.app.ui.theme.screen.addScreen.parts.AddressSearchUI
 import com.example.app.ui.theme.screen.addScreen.parts.BuildingInputUI
@@ -27,11 +26,7 @@ import com.example.app.ui.theme.screen.addScreen.parts.PhotoAddUI
 import com.example.app.ui.theme.screen.addScreen.parts.SubmitResultUI
 import com.example.app.viewModel.MapViewModel
 import com.example.app.viewModel.UserViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 
@@ -47,7 +42,7 @@ fun AddScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     /* STATE */
-    val searchInfo by mapViewModel.searchInfo.observeAsState()
+    val searchInfo by userViewModel.searchInfo.observeAsState()
     val searchInput by userViewModel.searchInput.observeAsState()
     val dateState by userViewModel.dateState.observeAsState()
     val isSpecial by userViewModel.isSpecial.observeAsState()
@@ -57,9 +52,7 @@ fun AddScreen(
     val submitButtonEnabled by userViewModel.submitButtonEnabled.observeAsState()
 
     /* Handler */
-    val toastWarningMessage = { message: String ->
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
+    val toastWarningMessage = { message: String -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }
 
     /* DATE_PICKER */
     val calendar = Calendar.getInstance()
@@ -93,7 +86,7 @@ fun AddScreen(
                             searchInfo = searchInfo,
                             searchInput = searchInput ?: "",
                             onSearchInputChanged = userViewModel.onSearchInputChanged,
-                            onLocationSearch = mapViewModel.onLocationSearch,
+                            onLocationSearch = userViewModel.onLocationSearch,
                             onAddressSelected = userViewModel.onAddressSelected,
                             keyboardController = keyboardController,
                             onNextInput = userViewModel.onNextInput,

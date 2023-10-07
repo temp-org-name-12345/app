@@ -69,3 +69,4 @@ data class RoadAddress(
     val fullAddress: String
         get() = "$addressName $buildingName"
 }
+

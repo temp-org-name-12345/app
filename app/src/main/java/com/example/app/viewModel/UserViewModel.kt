@@ -11,14 +11,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.app.dao.ImageUploadRes
 import com.example.app.model.AddLocationReq
+import com.example.app.model.ImageUploadRes
+import com.example.app.model.Location
 import com.example.app.model.RoadAddress
 import com.example.app.model.User
 import com.example.app.repository.UserRetrofitRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -27,10 +26,10 @@ import okio.BufferedSink
 import okio.source
 import java.time.LocalDate
 
-class UserViewModelFactory() : ViewModelProvider.Factory {
+class UserViewModelFactory(private val key: String) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-            return UserViewModel() as T
+            return UserViewModel(key) as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel Class")
@@ -38,63 +37,51 @@ class UserViewModelFactory() : ViewModelProvider.Factory {
 }
 
 class UserViewModel(
+    private val key: String,
     private val userRetrofitRepository: UserRetrofitRepository = UserRetrofitRepository
 ) : ViewModel() {
 
     private var _user : MutableLiveData<User> = MutableLiveData(null)
     val user : LiveData<User> get() = _user
 
-    fun saveUser(user: User) {
+    fun saveUser(user: User) =
         viewModelScope.launch {
             val result = userRetrofitRepository.saveUser(user)
-
-            if (result.isSuccessful) {
-                _user.value = result.body()
-            }
-
-            else {
-                _user.value = null
-            }
+            if (result.isSuccessful) _user.value = result.body()
+            else _user.value = null
         }
-    }
 
-    fun getUserByKeyHash(keyHash: String) {
+    fun getUserByKeyHash(keyHash: String) =
         viewModelScope.launch {
             val result = userRetrofitRepository.getUserByKeyHash(keyHash)
-
-            if (result.isSuccessful) {
-                _user.value = result.body()
-            } else {
-                _user.value = null
-            }
+            if (result.isSuccessful) _user.value = result.body()
+            else _user.value = null
         }
-    }
-
-    private val _thumbnailImage : MutableLiveData<List<String>> = MutableLiveData()
-    val thumbnailImage : LiveData<List<String>> get() = _thumbnailImage
-
-    fun getAppThumbnailImage() {
-        viewModelScope.launch {
-            val result = userRetrofitRepository.getAppThumbnail()
-
-            if (result.isSuccessful) _thumbnailImage.value = result.body()
-            else throw IllegalStateException(result.message())
-        }
-    }
 
     /* 유저 주소 검색 State */
     private val _searchInput : MutableLiveData<String> = MutableLiveData("")
     val searchInput : LiveData<String> get() = _searchInput
     val onSearchInputChanged = { input: String -> _searchInput.value = input }
 
+
+    private val _searchInfo = MutableLiveData<Location>()
+    val searchInfo : LiveData<Location> get() = _searchInfo
+    val onLocationSearch = { query: String -> searchLocationInfo(query) }
+
+    private fun searchLocationInfo(query: String) {
+        viewModelScope.launch {
+            val result = userRetrofitRepository.searchLocation(key, query)
+
+            if (result.isSuccessful) {
+                _searchInfo.value = result.body()
+            }
+        }
+    }
+
     /* 유저가 선택한 주소 저장 */
     private val _selectedAddress : MutableLiveData<RoadAddress> = MutableLiveData()
     val selectedAddress : LiveData<RoadAddress> get() = _selectedAddress
-    val onAddressSelected = { addr: RoadAddress? -> setSelectedAddress(addr) }
-
-    private fun setSelectedAddress(addr: RoadAddress?) {
-        addr?.let { _selectedAddress.value = it }
-    }
+    val onAddressSelected = { addr: RoadAddress? -> _selectedAddress.value = addr }
 
     /* Building Input 정보 */
     private val _buildingInput : MutableLiveData<String> = MutableLiveData("")

@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.example.app.model.User
 import com.example.app.util.KakaoLogin
+import com.example.app.viewModel.DefaultAppViewModel
 import com.example.app.viewModel.UserViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -22,15 +23,16 @@ import com.google.accompanist.pager.HorizontalPager
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun LoginScreen(
+    defaultAppViewModel: DefaultAppViewModel,
     userViewModel: UserViewModel,
     keyHash: String,
     navToMap: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        userViewModel.getAppThumbnailImage()
+        defaultAppViewModel.getAppThumbnailImage()
     }
 
-    val backgroundImages by userViewModel.thumbnailImage.observeAsState()
+    val backgroundImages by defaultAppViewModel.thumbnailImage.observeAsState()
 
     val context = LocalContext.current
     val saveAndNavToMap = {

@@ -2,13 +2,6 @@ package com.example.app.model
 
 import java.io.Serializable
 
-data class Res<T> (
-    val code: String?,
-    val message: String?,
-    val status: Int,
-    val data: T,
-    val isLoading: Boolean = false
-)
 
 data class User(
     var id: Int? = null,
@@ -18,6 +11,7 @@ data class User(
     val keyHash: String
 ) : Serializable
 
+/* 장소 업로드 요청에 대한 모델 */
 data class AddLocationReq(
     val lat: Double?,
     val lng: Double?,
@@ -28,4 +22,10 @@ data class AddLocationReq(
     val addressName: String?,
     val storeName: String?,
     val userId: Int?,
+)
+
+/* 이미지 업로드 처리에 따른 서버 응답 */
+data class ImageUploadRes(
+    val imageUrls: List<String>,
+    val data: AddLocationReq
 )
