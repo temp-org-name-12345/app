@@ -9,8 +9,13 @@ object DefaultAppRepository {
     private val defaultAppDao = RetrofitClient.defaultAppDao
     private fun logging(methodName: String, it: Any?) = Log.e(TAG, "$methodName : $it")
 
-    suspend fun getAppThumbnail() : Response<List<String>> =
+    suspend fun getAppThumbnail() : Response<String> =
        defaultAppDao
             .getAppThumbnail()
             .also { logging("getAppThumbnail()", it) }
+
+    suspend fun getAppPreview() : Response<List<String>> =
+        defaultAppDao
+            .getAppPreview()
+            .also { logging("getAppPreview()", it) }
 }

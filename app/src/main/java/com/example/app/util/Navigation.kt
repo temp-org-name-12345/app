@@ -19,30 +19,25 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 
-sealed class Screen(val route: String) {
-    object Splash : Screen("splash")
+sealed class Screen(
+    val route: String,
+    val title: String = "",
+    val icon: ImageVector? = null,
+) {
     object Login : Screen("login")
     object User : Screen("user")
+    object Map : Screen("map", "Map", Icons.Filled.Home)
+    object Add : Screen("add", "Add", Icons.Filled.Add)
+    object Profile : Screen("profile", "Profile", Icons.Filled.AccountCircle)
 
-    sealed class BottomNavScreen(
-        val route: String,
-        val title: String,
-        val icon: ImageVector,
-        val badgeCount: Int
-    ) {
-        object Map : BottomNavScreen("map", "Map", Icons.Filled.Home, 3)
-        object Add : BottomNavScreen("add", "Add", Icons.Filled.Add, 5)
-        object Profile : BottomNavScreen("profile", "Profile", Icons.Filled.AccountCircle, 5)
-
-        companion object {
-            val BottomItems = listOf(Map, Add, Profile)
-        }
+    companion object {
+        val BottomItems = listOf(Map, Add, Profile)
     }
 }
 
 @Composable
 fun BottomNavGraph(navController: NavController) {
-    val items = Screen.BottomNavScreen.BottomItems
+    val items = Screen.BottomItems
 
     BottomNavigation(
         backgroundColor = MaterialTheme.colors.surface,
@@ -53,7 +48,7 @@ fun BottomNavGraph(navController: NavController) {
 
         items.forEach { item ->
             BottomNavigationItem(
-                icon = { Icon(imageVector = item.icon, contentDescription = null) },
+                icon = { Icon(imageVector = item.icon!!, contentDescription = null) },
                 label = { Text(text = item.title, fontSize = 12.sp, fontWeight = FontWeight.Bold) },
                 selectedContentColor = Color.Black,
                 unselectedContentColor = Color.Black.copy(0.4f),

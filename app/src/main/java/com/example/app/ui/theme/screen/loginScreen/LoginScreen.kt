@@ -29,10 +29,10 @@ fun LoginScreen(
     navToMap: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        defaultAppViewModel.getAppThumbnailImage()
+        defaultAppViewModel.getAppPreviewImages()
     }
 
-    val backgroundImages by defaultAppViewModel.thumbnailImage.observeAsState()
+    val previewImages by defaultAppViewModel.previewImages.observeAsState()
 
     val context = LocalContext.current
     val saveAndNavToMap = {
@@ -44,7 +44,7 @@ fun LoginScreen(
         content = { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
 
-                backgroundImages?.let { images ->
+                previewImages?.let { images ->
                     HorizontalPager(
                         modifier = Modifier.fillMaxSize(),
                         count = images.size

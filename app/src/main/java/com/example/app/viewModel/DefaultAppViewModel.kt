@@ -22,15 +22,26 @@ class DefaultAppViewModel(
     private val defaultAppRepository : DefaultAppRepository = DefaultAppRepository
 ) : ViewModel() {
 
-    private val _thumbnailImage : MutableLiveData<List<String>> = MutableLiveData()
-    val thumbnailImage : LiveData<List<String>> get() = _thumbnailImage
+    private val _thumbnailImage : MutableLiveData<String> = MutableLiveData()
+    val thumbnailImage : LiveData<String> get() = _thumbnailImage
 
     fun getAppThumbnailImage() {
         viewModelScope.launch {
             val result = defaultAppRepository.getAppThumbnail()
-
             if (result.isSuccessful) _thumbnailImage.value = result.body()
             else throw IllegalStateException(result.message())
         }
     }
+
+    private val _previewImages : MutableLiveData<List<String>> = MutableLiveData()
+    val previewImages : LiveData<List<String>> get() = _previewImages
+
+    fun getAppPreviewImages() {
+        viewModelScope.launch {
+            val res = defaultAppRepository.getAppPreview()
+            if (res.isSuccessful) _previewImages.value = res.body()
+            else throw IllegalStateException(res.message())
+        }
+    }
+
 }

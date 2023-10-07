@@ -33,9 +33,10 @@ import java.util.Calendar
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddScreen(
-    mapViewModel: MapViewModel,
     userViewModel: UserViewModel,
-    onPostSubmitRoute: () -> Unit
+    mapViewModel: MapViewModel,
+    onPostSubmitRoute: () -> Unit,
+    bottomNavGraph: @Composable () -> Unit
 ) {
     /* CONTEXT */
     val context = LocalContext.current
@@ -66,7 +67,9 @@ fun AddScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = bottomNavGraph
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()

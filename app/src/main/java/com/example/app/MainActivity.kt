@@ -3,13 +3,11 @@ package com.example.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -23,7 +21,6 @@ import com.example.app.ui.theme.screen.MapScreen
 import com.example.app.ui.theme.screen.ProfileScreen
 import com.example.app.ui.theme.screen.UserScreen
 import com.example.app.ui.theme.screen.loginScreen.LoginScreen
-import com.example.app.ui.theme.screen.splashScreen.SplashScreen
 import com.example.app.util.BottomNavGraph
 import com.example.app.util.Screen
 import com.example.app.viewModel.DefaultAppViewModel
@@ -73,55 +70,64 @@ fun Root(
     mapViewModel: MapViewModel,
     keyHash: String
 ) {
+    LaunchedEffect(Unit) {
+        userViewModel.getUserByKeyHash(keyHash)
+    }
+
     val navController = rememberNavController()
+
+    /* STATES */
     val user by userViewModel.user.observeAsState()
 
-    val navToLogin = { navController.navigate(Screen.Login.route) }
-    val navToMap = { navController.navigate(Screen.BottomNavScreen.Map.route) }
+    /* NAV HANDLERS */
+    val navToMap = { navController.navigate(Screen.Map.route) }
 
-    Scaffold(
-        bottomBar = { BottomNavGraph(navController = navController) }
+    NavHost(
+        navController = navController,
+        startDestination = if (user == null) Screen.Login.route else Screen.Map.route
     ) {
 
-        Box(modifier = Modifier.padding(it)) {
-            NavHost(navController = navController, startDestination = Screen.Splash.route) {
-                composable(route = Screen.Splash.route) {
-                    SplashScreen(
-                        defaultAppViewModel = defaultAppViewModel,
-                        userViewModel = userViewModel,
-                        keyHash = keyHash,
-                        navToLogin = navToLogin,
-                        navToMap = navToMap
-                    )
-                }
+        composable(route = Screen.Login.route) {
+            LoginScreen(
+                defaultAppViewModel = defaultAppViewModel,
+                userViewModel = userViewModel,
+                keyHash = keyHash,
+                navToMap = navToMap
+            )
+        }
 
-                composable(route = Screen.Login.route) {
-                    LoginScreen(
-                        defaultAppViewModel = defaultAppViewModel,
-                        userViewModel = userViewModel,
-                        keyHash = keyHash,
-                        navToMap = navToMap
-                    )
-                }
-
-                composable(route = Screen.BottomNavScreen.Map.route) {
-                    MapScreen(userViewModel, user)
-                }
-
-                composable(route = Screen.BottomNavScreen.Add.route) {
-                    val onPostSubmitRoute = { navController.navigate(Screen.User.route) }
-                    AddScreen(mapViewModel, userViewModel, onPostSubmitRoute)
-                }
-
-                composable(route = Screen.BottomNavScreen.Profile.route) {
-                    ProfileScreen()
-                }
-
-                composable(route = Screen.User.route) {
-                    UserScreen(userViewModel)
-                }
+        composable(route = Screen.User.route) {
+            UserScreen(userViewModel) {
+                BottomNavGraph(navController = navController)
             }
         }
+
+        composable(route = Screen.Map.route) {
+            MapScreen(
+                userViewModel = userViewModel,
+                user = user
+            )
+
+        }
+
+        composable(route = Screen.Add.route) {
+            val onPostSubmitRoute = { navController.navigate(Screen.User.route) }
+
+            AddScreen(
+                userViewModel = userViewModel,
+                mapViewModel = mapViewModel,
+                onPostSubmitRoute = onPostSubmitRoute
+            ) {
+                BottomNavGraph(navController = navController)
+            }
+        }
+
+        composable(route = Screen.Profile.route) {
+            ProfileScreen {
+                BottomNavGraph(navController = navController)
+            }
+        }
+
     }
 }
 

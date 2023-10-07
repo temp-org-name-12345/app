@@ -6,12 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitClient {
-    private const val host = "15.164.24.152"
-    private const val port = "8080"
-    private const val version = "api/v1"
-    private const val prefix = "user"
-    private const val domain = "http://$host:$port/$version/$prefix/"
-    private const val domainMap = "https://dapi.kakao.com/v2/local/search/"
+    private const val defaultDomain = "http://15.164.24.152:8080/api/v1/"
+    private const val kakaoApiDomain = "https://dapi.kakao.com/v2/local/search/"
 
     private val retrofit : Retrofit by lazy {
         val gson = GsonBuilder()
@@ -19,19 +15,19 @@ object RetrofitClient {
             .create()
 
         Retrofit.Builder()
-            .baseUrl(domain)
+            .baseUrl(defaultDomain)
             .addConverterFactory(ScalarsConverterFactory.create())  // String 응답처리 Converter
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
-    private val retrofitMap : Retrofit by lazy {
+    private val retrofitForKakao : Retrofit by lazy {
         val gson = GsonBuilder()
             .setLenient()
             .create()
 
         Retrofit.Builder()
-            .baseUrl(domainMap)
+            .baseUrl(kakaoApiDomain)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
@@ -45,6 +41,6 @@ object RetrofitClient {
     }
 
     val kakaoMapDao : KakaoMapDao by lazy {
-        retrofitMap.create(KakaoMapDao::class.java)
+        retrofitForKakao.create(KakaoMapDao::class.java)
     }
 }
